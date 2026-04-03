@@ -1,11 +1,10 @@
-﻿namespace TaskManager.Models.Entities;
+﻿using System.Collections.Generic;
 
-public class Board : BaseEntity
+namespace TaskManager.Models.Entities
 {
-    public string Title { get; set; }
-
-    public string UserId { get; set; }
-    public ApplicationUser User { get; set; }
-
-    public ICollection<TaskItem> Tasks { get; set; }
+    public class Board : BaseEntity
+    {
+        public string Name { get; set; } = string.Empty;
+        public ICollection<TaskItem> Tasks { get; set; } = new List<TaskItem>();
+    }
 }
