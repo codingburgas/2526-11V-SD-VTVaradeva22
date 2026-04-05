@@ -13,6 +13,7 @@ namespace TaskManager.Data.Context
 
         public DbSet<Board> Boards { get; set; }
         public DbSet<TaskItem> Tasks { get; set; }
+        
 
         protected override void OnModelCreating(ModelBuilder builder)
         {
