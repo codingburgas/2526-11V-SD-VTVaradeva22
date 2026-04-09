@@ -1,61 +1,106 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using TaskManager.Models.Entities;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using TaskManager.Helpers;
 using TaskManager.Services.Interfaces;
+using TaskManager.ViewModels;
 
-namespace TaskManager.Controllers
+namespace TaskManager.Controllers;
+
+[Authorize]
+public class BoardsController : Controller
 {
-    public class BoardController : Controller
+    private readonly IBoardService _boardService;
+
+    public BoardsController(IBoardService boardService)
     {
-        private readonly IBoardService _service;
+        _boardService = boardService;
+    }
 
-        public BoardController(IBoardService service)
+    public async Task<IActionResult> Index()
+    {
+        var boards = await _boardService.GetAllAsync(User.GetUserId()!, User.IsInRole("Admin"));
+        return View(boards);
+    }
+
+    public async Task<IActionResult> Details(int id)
+    {
+        var board = await _boardService.GetDetailsAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
+        if (board == null)
         {
-            _service = service;
+            return NotFound();
         }
 
-        public async Task<IActionResult> Index()
+        return View(board);
+    }
+
+    public IActionResult Create()
+    {
+        return View(new BoardViewModel());
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Create(BoardViewModel model)
+    {
+        if (!ModelState.IsValid)
         {
-            var boards = await _service.GetAllBoardsAsync();
-            return View(boards);
+            return View(model);
         }
 
-        public IActionResult Create() => View();
+        var boardId = await _boardService.CreateAsync(model, User.GetUserId()!);
+        TempData["SuccessMessage"] = "Board created successfully.";
+        return RedirectToAction(nameof(Details), new { id = boardId });
+    }
 
-        [HttpPost]
-        public async Task<IActionResult> Create(Board board)
+    public async Task<IActionResult> Edit(int id)
+    {
+        var model = await _boardService.GetEditModelAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
+        if (model == null)
         {
-            if (!ModelState.IsValid) return View(board);
-            await _service.AddBoardAsync(board);
-            return RedirectToAction(nameof(Index));
+            return NotFound();
         }
 
-        public async Task<IActionResult> Edit(int id)
+        return View(model);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Edit(BoardViewModel model)
+    {
+        if (!ModelState.IsValid)
         {
-            var board = await _service.GetBoardByIdAsync(id);
-            if (board == null) return NotFound();
-            return View(board);
+            return View(model);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Edit(Board board)
+        var updated = await _boardService.UpdateAsync(model, User.GetUserId()!, User.IsInRole("Admin"));
+        if (!updated)
         {
-            if (!ModelState.IsValid) return View(board);
-            await _service.UpdateBoardAsync(board);
-            return RedirectToAction(nameof(Index));
+            return NotFound();
         }
 
-        public async Task<IActionResult> Delete(int id)
+        TempData["SuccessMessage"] = "Board updated successfully.";
+        return RedirectToAction(nameof(Details), new { id = model.Id });
+    }
+
+    public async Task<IActionResult> Delete(int id)
+    {
+        var board = await _boardService.GetSummaryAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
+        if (board == null)
         {
-            var board = await _service.GetBoardByIdAsync(id);
-            if (board == null) return NotFound();
-            return View(board);
+            return NotFound();
         }
 
-        [HttpPost, ActionName("Delete")]
-        public async Task<IActionResult> DeleteConfirmed(int id)
+        return View(board);
+    }
+
+    [HttpPost, ActionName("Delete")]
+    public async Task<IActionResult> DeleteConfirmed(int id)
+    {
+        var deleted = await _boardService.DeleteAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
+        if (!deleted)
         {
-            await _service.DeleteBoardAsync(id);
-            return RedirectToAction(nameof(Index));
+            return NotFound();
         }
+
+        TempData["SuccessMessage"] = "Board deleted successfully.";
+        return RedirectToAction(nameof(Index));
     }
 }
