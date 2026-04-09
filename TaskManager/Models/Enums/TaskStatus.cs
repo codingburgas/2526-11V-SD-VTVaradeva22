@@ -1,12 +1,8 @@
-﻿namespace TaskManager.Models.Enums;
+namespace TaskManager.Models.Enums;
 
-    public enum TaskStatus
-    {
-        ToDo,
-        InProgress,
-        Done
-        
-    }
-
-
-
+public enum TaskStatus
+{
+    ToDo = 1,
+    InProgress = 2,
+    Done = 3
+}

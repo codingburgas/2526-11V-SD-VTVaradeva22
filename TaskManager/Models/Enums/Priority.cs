@@ -1,8 +1,8 @@
-﻿namespace TaskManager.Models.Enums;
+namespace TaskManager.Models.Enums;
 
 public enum Priority
-    {
-        Low,
-        Medium,
-        High
-    }
+{
+    Low = 1,
+    Medium = 2,
+    High = 3
+}
