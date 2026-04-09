@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace TaskManager.Migrations
 {
     /// <inheritdoc />
-    public partial class SetupIdentity : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -30,6 +30,7 @@ namespace TaskManager.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    FullName = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     UserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     NormalizedUserName = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
                     Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
@@ -162,17 +163,41 @@ namespace TaskManager.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    UserId = table.Column<string>(type: "nvarchar(450)", nullable: false),
+                    Name = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(250)", maxLength: 250, nullable: false),
+                    OwnerId = table.Column<string>(type: "nvarchar(450)", nullable: false),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Boards", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Boards_AspNetUsers_UserId",
-                        column: x => x.UserId,
+                        name: "FK_Boards_AspNetUsers_OwnerId",
+                        column: x => x.OwnerId,
                         principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "BoardLists",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    Title = table.Column<string>(type: "nvarchar(80)", maxLength: 80, nullable: false),
+                    Status = table.Column<int>(type: "int", nullable: false),
+                    Position = table.Column<int>(type: "int", nullable: false),
+                    BoardId = table.Column<int>(type: "int", nullable: false),
+                    CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_BoardLists", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_BoardLists_Boards_BoardId",
+                        column: x => x.BoardId,
+                        principalTable: "Boards",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -183,17 +208,33 @@ namespace TaskManager.Migrations
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    Title = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Description = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Title = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
+                    Description = table.Column<string>(type: "nvarchar(1000)", maxLength: 1000, nullable: false),
                     Deadline = table.Column<DateTime>(type: "datetime2", nullable: true),
                     Priority = table.Column<int>(type: "int", nullable: false),
                     Status = table.Column<int>(type: "int", nullable: false),
+                    Position = table.Column<int>(type: "int", nullable: false),
+                    CompletedAt = table.Column<DateTime>(type: "datetime2", nullable: true),
                     BoardId = table.Column<int>(type: "int", nullable: false),
+                    BoardListId = table.Column<int>(type: "int", nullable: false),
+                    AssignedToId = table.Column<string>(type: "nvarchar(450)", nullable: true),
                     CreatedAt = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Tasks", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Tasks_AspNetUsers_AssignedToId",
+                        column: x => x.AssignedToId,
+                        principalTable: "AspNetUsers",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_Tasks_BoardLists_BoardListId",
+                        column: x => x.BoardListId,
+                        principalTable: "BoardLists",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Tasks_Boards_BoardId",
                         column: x => x.BoardId,
@@ -242,14 +283,34 @@ namespace TaskManager.Migrations
                 filter: "[NormalizedUserName] IS NOT NULL");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Boards_UserId",
-                table: "Boards",
-                column: "UserId");
+                name: "IX_BoardLists_BoardId_Position",
+                table: "BoardLists",
+                columns: new[] { "BoardId", "Position" });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Tasks_BoardId",
+                name: "IX_Boards_OwnerId_Name",
+                table: "Boards",
+                columns: new[] { "OwnerId", "Name" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_AssignedToId",
                 table: "Tasks",
-                column: "BoardId");
+                column: "AssignedToId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_BoardId_Status_Priority",
+                table: "Tasks",
+                columns: new[] { "BoardId", "Status", "Priority" });
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_BoardListId",
+                table: "Tasks",
+                column: "BoardListId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Tasks_Deadline",
+                table: "Tasks",
+                column: "Deadline");
         }
 
         /// <inheritdoc />
@@ -275,6 +336,9 @@ namespace TaskManager.Migrations
 
             migrationBuilder.DropTable(
                 name: "AspNetRoles");
+
+            migrationBuilder.DropTable(
+                name: "BoardLists");
 
             migrationBuilder.DropTable(
                 name: "Boards");

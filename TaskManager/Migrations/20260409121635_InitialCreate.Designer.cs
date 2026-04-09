@@ -12,8 +12,8 @@ using TaskManager.Data.Context;
 namespace TaskManager.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260403165522_SetupIdentity")]
-    partial class SetupIdentity
+    [Migration("20260409121635_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -177,6 +177,11 @@ namespace TaskManager.Migrations
                     b.Property<bool>("EmailConfirmed")
                         .HasColumnType("bit");
 
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
                     b.Property<bool>("LockoutEnabled")
                         .HasColumnType("bit");
 
@@ -234,22 +239,28 @@ namespace TaskManager.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(250)
+                        .HasColumnType("nvarchar(250)");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("OwnerId")
                         .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("OwnerId", "Name");
 
                     b.ToTable("Boards");
                 });
 
-            modelBuilder.Entity("TaskManager.Models.Entities.TaskItem", b =>
+            modelBuilder.Entity("TaskManager.Models.Entities.BoardList", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -263,12 +274,57 @@ namespace TaskManager.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BoardId", "Position");
+
+                    b.ToTable("BoardLists");
+                });
+
+            modelBuilder.Entity("TaskManager.Models.Entities.TaskItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AssignedToId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<int>("BoardId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("BoardListId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("CompletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime?>("Deadline")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<int>("Position")
+                        .HasColumnType("int");
 
                     b.Property<int>("Priority")
                         .HasColumnType("int");
@@ -278,11 +334,18 @@ namespace TaskManager.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BoardId");
+                    b.HasIndex("AssignedToId");
+
+                    b.HasIndex("BoardListId");
+
+                    b.HasIndex("Deadline");
+
+                    b.HasIndex("BoardId", "Status", "Priority");
 
                     b.ToTable("Tasks");
                 });
@@ -340,17 +403,19 @@ namespace TaskManager.Migrations
 
             modelBuilder.Entity("TaskManager.Models.Entities.Board", b =>
                 {
-                    b.HasOne("TaskManager.Models.Entities.ApplicationUser", null)
+                    b.HasOne("TaskManager.Models.Entities.ApplicationUser", "Owner")
                         .WithMany("Boards")
-                        .HasForeignKey("UserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("OwnerId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Owner");
                 });
 
-            modelBuilder.Entity("TaskManager.Models.Entities.TaskItem", b =>
+            modelBuilder.Entity("TaskManager.Models.Entities.BoardList", b =>
                 {
                     b.HasOne("TaskManager.Models.Entities.Board", "Board")
-                        .WithMany("Tasks")
+                        .WithMany("Lists")
                         .HasForeignKey("BoardId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -358,12 +423,47 @@ namespace TaskManager.Migrations
                     b.Navigation("Board");
                 });
 
+            modelBuilder.Entity("TaskManager.Models.Entities.TaskItem", b =>
+                {
+                    b.HasOne("TaskManager.Models.Entities.ApplicationUser", "AssignedTo")
+                        .WithMany("AssignedTasks")
+                        .HasForeignKey("AssignedToId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("TaskManager.Models.Entities.Board", "Board")
+                        .WithMany("Tasks")
+                        .HasForeignKey("BoardId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TaskManager.Models.Entities.BoardList", "BoardList")
+                        .WithMany("Tasks")
+                        .HasForeignKey("BoardListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("AssignedTo");
+
+                    b.Navigation("Board");
+
+                    b.Navigation("BoardList");
+                });
+
             modelBuilder.Entity("TaskManager.Models.Entities.ApplicationUser", b =>
                 {
+                    b.Navigation("AssignedTasks");
+
                     b.Navigation("Boards");
                 });
 
             modelBuilder.Entity("TaskManager.Models.Entities.Board", b =>
+                {
+                    b.Navigation("Lists");
+
+                    b.Navigation("Tasks");
+                });
+
+            modelBuilder.Entity("TaskManager.Models.Entities.BoardList", b =>
                 {
                     b.Navigation("Tasks");
                 });
