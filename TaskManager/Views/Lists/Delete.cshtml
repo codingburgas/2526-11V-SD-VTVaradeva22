@@ -1,0 +1,18 @@
+@model BoardListViewModel
+@{
+    ViewData["Title"] = "Delete List";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <h1 class="h3 text-danger mb-3">Delete list</h1>
+        <p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
+        <p class="text-secondary">The list must be empty before it can be removed.</p>
+
+        <form method="post">
+            <input type="hidden" name="boardId" value="@Model.BoardId" />
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a class="btn btn-outline-secondary" asp-controller="Boards" asp-action="Details" asp-route-id="@Model.BoardId">Cancel</a>
+        </form>
+    </div>
+</div>

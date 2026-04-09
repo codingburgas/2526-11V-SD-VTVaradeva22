@@ -1,0 +1,63 @@
+@model TaskViewModel
+@{
+    ViewData["Title"] = "Edit Task";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <h1 class="h3 mb-3">Edit task</h1>
+        <form method="post" class="task-form">
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <label asp-for="BoardId" class="form-label"></label>
+                    <select asp-for="BoardId" class="form-select js-board-select" asp-items="Model.AvailableBoards"></select>
+                    <span asp-validation-for="BoardId" class="text-danger"></span>
+                </div>
+                <div class="col-md-6">
+                    <label asp-for="BoardListId" class="form-label"></label>
+                    <select asp-for="BoardListId" class="form-select js-list-select" asp-items="Model.AvailableLists"></select>
+                    <span asp-validation-for="BoardListId" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                </div>
+                <div class="col-12">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" class="form-control" rows="4"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Priority" class="form-label"></label>
+                    <select asp-for="Priority" class="form-select" asp-items="Html.GetEnumSelectList<Priority>()"></select>
+                    <span asp-validation-for="Priority" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="Deadline" class="form-label"></label>
+                    <input asp-for="Deadline" class="form-control" />
+                    <span asp-validation-for="Deadline" class="text-danger"></span>
+                </div>
+                <div class="col-md-4">
+                    <label asp-for="AssignedToId" class="form-label"></label>
+                    <select asp-for="AssignedToId" class="form-select" asp-items="Model.AvailableUsers">
+                        <option value="">Select user</option>
+                    </select>
+                    <span asp-validation-for="AssignedToId" class="text-danger"></span>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2 mt-4">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

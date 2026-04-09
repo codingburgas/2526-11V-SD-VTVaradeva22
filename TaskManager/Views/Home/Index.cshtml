@@ -1,8 +1,35 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+@{
+    ViewData["Title"] = "Home";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+<section class="hero-card p-4 p-lg-5 rounded-4">
+    <div class="row align-items-center g-4">
+        <div class="col-lg-7">
+            <span class="badge text-bg-light mb-3">Kanban Task Manager</span>
+            <h1 class="display-5 fw-bold">Organize boards, lists and tasks in one clean workflow.</h1>
+            <p class="lead text-secondary mt-3">
+                Build project boards, move tasks through status columns, assign deadlines and track progress with weekly statistics.
+            </p>
+            <div class="d-flex flex-wrap gap-2 mt-4">
+                <a class="btn btn-primary btn-lg" asp-controller="Account" asp-action="Login">Start Working</a>
+                <a class="btn btn-outline-primary btn-lg" asp-controller="Account" asp-action="Register">Create Account</a>
+            </div>
+        </div>
+        <div class="col-lg-5">
+            <div class="feature-panel">
+                <div class="feature-item">
+                    <h5>Boards & Lists</h5>
+                    <p>Create project spaces and split the work into flexible columns.</p>
+                </div>
+                <div class="feature-item">
+                    <h5>Task Tracking</h5>
+                    <p>Use priority, deadlines and assignment to keep every task clear.</p>
+                </div>
+                <div class="feature-item">
+                    <h5>Live Dashboard</h5>
+                    <p>Monitor completion progress, top performers and upcoming deadlines.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>

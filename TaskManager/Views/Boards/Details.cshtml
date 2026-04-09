@@ -1,0 +1,83 @@
+@model BoardDetailsViewModel
+@{
+    ViewData["Title"] = Model.Board.Name;
+}
+
+<div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">@Model.Board.Name</h1>
+        <p class="text-secondary mb-0">@Model.Board.Description</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-primary" asp-controller="Tasks" asp-action="Create" asp-route-boardId="@Model.Board.Id">New Task</a>
+        <a class="btn btn-outline-primary" asp-controller="Lists" asp-action="Create" asp-route-boardId="@Model.Board.Id">New List</a>
+        <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Board.Id">Edit Board</a>
+    </div>
+</div>
+
+<div class="board-summary row g-3 mb-4">
+    <div class="col-md-4">
+        <div class="stat-card">
+            <span>Total tasks</span>
+            <strong>@Model.Board.TotalTasks</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <span>Completed</span>
+            <strong>@Model.Board.CompletedTasks</strong>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="stat-card">
+            <span>Pending</span>
+            <strong>@Model.Board.PendingTasks</strong>
+        </div>
+    </div>
+</div>
+
+@Html.AntiForgeryToken()
+
+<div class="kanban-board">
+    @foreach (var list in Model.Lists)
+    {
+        <section class="kanban-column">
+            <div class="kanban-column-header">
+                <div>
+                    <h2 class="h5 mb-1">@list.Title</h2>
+                    <span class="text-secondary small">@list.Status</span>
+                </div>
+                <div class="d-flex gap-2">
+                    <a class="btn btn-sm btn-outline-secondary" asp-controller="Lists" asp-action="Edit" asp-route-id="@list.Id">Edit</a>
+                    <a class="btn btn-sm btn-outline-danger" asp-controller="Lists" asp-action="Delete" asp-route-id="@list.Id">Delete</a>
+                </div>
+            </div>
+
+            <div class="kanban-list-body" data-list-id="@list.Id">
+                @foreach (var task in list.Tasks)
+                {
+                    <article class="kanban-card" draggable="true" data-task-id="@task.Id">
+                        <div class="d-flex justify-content-between gap-2 mb-2">
+                            <h3 class="h6 mb-0">@task.Title</h3>
+                            <span class="badge @(task.Priority switch { Priority.High => "text-bg-danger", Priority.Medium => "text-bg-warning", _ => "text-bg-secondary" })">
+                                @task.Priority
+                            </span>
+                        </div>
+
+                        <p class="small text-secondary mb-2">@task.Description</p>
+
+                        <div class="small text-secondary d-flex flex-column gap-1 mb-3">
+                            <span>Assigned: @(task.AssignedToName ?? "Unassigned")</span>
+                            <span>Deadline: @(task.Deadline?.ToString("dd MMM yyyy") ?? "No deadline")</span>
+                        </div>
+
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary" asp-controller="Tasks" asp-action="Details" asp-route-id="@task.Id">Open</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-controller="Tasks" asp-action="Edit" asp-route-id="@task.Id">Edit</a>
+                        </div>
+                    </article>
+                }
+            </div>
+        </section>
+    }
+</div>

@@ -1,0 +1,31 @@
+@model EditUserRoleViewModel
+@{
+    ViewData["Title"] = "Edit User Role";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <h1 class="h3 mb-3">Edit user role</h1>
+        <p class="text-secondary">@Model.FullName (@Model.Email)</p>
+
+        <form method="post">
+            <input asp-for="Id" type="hidden" />
+            <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+            <div class="mb-4">
+                <label asp-for="SelectedRole" class="form-label"></label>
+                <select asp-for="SelectedRole" class="form-select" asp-items="Model.AvailableRoles"></select>
+                <span asp-validation-for="SelectedRole" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Save</button>
+                <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

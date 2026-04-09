@@ -1,29 +1,41 @@
-@model IEnumerable<TaskManager.Models.Entities.Board>
+@model IReadOnlyCollection<BoardDto>
 @{
     ViewData["Title"] = "Boards";
 }
 
-<h2>Boards</h2>
-<a class="btn btn-primary mb-2" href="@Url.Action("Create")">Create New Board</a>
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Boards</h1>
+        <p class="text-secondary mb-0">Manage project spaces and open each board in Kanban view.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">Create Board</a>
+</div>
 
-<table class="table table-striped">
-    <thead>
-    <tr>
-        <th>Name</th>
-        <th>Actions</th>
-    </tr>
-    </thead>
-    <tbody>
+<div class="row g-4">
     @foreach (var board in Model)
     {
-        <tr>
-            <td>@board.Name</td>
-            <td>
-                <a class="btn btn-sm btn-warning" href="@Url.Action("Edit", new { id = board.Id })">Edit</a>
-                <a class="btn btn-sm btn-danger" href="@Url.Action("Delete", new { id = board.Id })">Delete</a>
-            </td>
-        </tr>
+        <div class="col-md-6 col-xl-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div>
+                            <h2 class="h5 mb-1">@board.Name</h2>
+                            <p class="text-secondary small mb-0">Owner: @board.OwnerName</p>
+                        </div>
+                        <span class="badge rounded-pill text-bg-primary">@board.TotalTasks tasks</span>
+                    </div>
+                    <p class="text-secondary">@board.Description</p>
+                    <div class="d-flex gap-3 small text-secondary mb-4">
+                        <span>Done: @board.CompletedTasks</span>
+                        <span>Pending: @board.PendingTasks</span>
+                    </div>
+                    <div class="d-flex flex-wrap gap-2">
+                        <a class="btn btn-outline-primary btn-sm" asp-action="Details" asp-route-id="@board.Id">Open</a>
+                        <a class="btn btn-outline-secondary btn-sm" asp-action="Edit" asp-route-id="@board.Id">Edit</a>
+                        <a class="btn btn-outline-danger btn-sm" asp-action="Delete" asp-route-id="@board.Id">Delete</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     }
-    </tbody>
-</table>
-
+</div>

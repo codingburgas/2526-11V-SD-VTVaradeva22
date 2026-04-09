@@ -1,0 +1,83 @@
+@model TaskIndexViewModel
+@{
+    ViewData["Title"] = "Tasks";
+}
+
+<div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+    <div>
+        <h1 class="h2 mb-1">Tasks</h1>
+        <p class="text-secondary mb-0">Filter by board, priority and status.</p>
+    </div>
+    <a class="btn btn-primary" asp-action="Create">Create Task</a>
+</div>
+
+<div class="card shadow-sm border-0 mb-4">
+    <div class="card-body">
+        <form method="get" class="row g-3">
+            <div class="col-md-4">
+                <label class="form-label">Board</label>
+                <select asp-for="SelectedBoardId" class="form-select" asp-items="Model.Boards">
+                    <option value="">All boards</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Priority</label>
+                <select asp-for="SelectedPriority" class="form-select" asp-items="Html.GetEnumSelectList<Priority>()">
+                    <option value="">All priorities</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Status</label>
+                <select asp-for="SelectedStatus" class="form-select" asp-items="Html.GetEnumSelectList<TaskManager.Models.Enums.TaskStatus>()">
+                    <option value="">All statuses</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex align-items-end">
+                <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+            <tr>
+                <th>Title</th>
+                <th>Board</th>
+                <th>Status</th>
+                <th>Priority</th>
+                <th>Deadline</th>
+                <th>Assigned To</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody>
+            @foreach (var task in Model.Tasks)
+            {
+                <tr>
+                    <td>
+                        <div class="fw-semibold">@task.Title</div>
+                        <div class="small text-secondary">@task.ListTitle</div>
+                    </td>
+                    <td>@task.BoardName</td>
+                    <td>@task.Status</td>
+                    <td>@task.Priority</td>
+                    <td class="@(task.IsOverdue ? "text-danger fw-semibold" : "")">
+                        @(task.Deadline?.ToString("dd MMM yyyy") ?? "No deadline")
+                    </td>
+                    <td>@(task.AssignedToName ?? "Unassigned")</td>
+                    <td>
+                        <div class="d-flex gap-2">
+                            <a class="btn btn-sm btn-outline-primary" asp-action="Details" asp-route-id="@task.Id">Open</a>
+                            <a class="btn btn-sm btn-outline-secondary" asp-action="Edit" asp-route-id="@task.Id">Edit</a>
+                            <a class="btn btn-sm btn-outline-danger" asp-action="Delete" asp-route-id="@task.Id">Delete</a>
+                        </div>
+                    </td>
+                </tr>
+            }
+            </tbody>
+        </table>
+    </div>
+</div>

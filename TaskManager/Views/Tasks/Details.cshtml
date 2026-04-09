@@ -1,0 +1,35 @@
+@model TaskDto
+@{
+    ViewData["Title"] = Model.Title;
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+            <div>
+                <h1 class="h3 mb-1">@Model.Title</h1>
+                <p class="text-secondary mb-0">@Model.BoardName / @Model.ListTitle</p>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-secondary" asp-action="Edit" asp-route-id="@Model.Id">Edit</a>
+                <a class="btn btn-outline-danger" asp-action="Delete" asp-route-id="@Model.Id">Delete</a>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-lg-8">
+                <h2 class="h5">Description</h2>
+                <p class="text-secondary mb-0">@Model.Description</p>
+            </div>
+            <div class="col-lg-4">
+                <div class="task-meta">
+                    <div><strong>Status:</strong> @Model.Status</div>
+                    <div><strong>Priority:</strong> @Model.Priority</div>
+                    <div><strong>Assigned:</strong> @(Model.AssignedToName ?? "Unassigned")</div>
+                    <div><strong>Deadline:</strong> @(Model.Deadline?.ToString("dd MMM yyyy") ?? "No deadline")</div>
+                    <div><strong>Created:</strong> @Model.CreatedAt.ToString("dd MMM yyyy")</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

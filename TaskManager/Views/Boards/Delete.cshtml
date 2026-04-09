@@ -1,14 +1,17 @@
-﻿@model TaskManager.Models.Entities.Board
+@model BoardDto
 @{
     ViewData["Title"] = "Delete Board";
 }
 
-<h2>Delete Board</h2>
-<p>Are you sure you want to delete <strong>@Model.Name</strong>?</p>
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <h1 class="h3 text-danger mb-3">Delete board</h1>
+        <p>Are you sure you want to delete <strong>@Model.Name</strong>?</p>
+        <p class="text-secondary">This will also remove all lists and tasks inside the board.</p>
 
-<form asp-action="Delete" method="post">
-    <input type="hidden" asp-for="Id" />
-    <button type="submit" class="btn btn-danger">Delete</button>
-    <a asp-action="Index" class="btn btn-secondary">Cancel</a>
-</form>
-
+        <form method="post">
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a class="btn btn-outline-secondary" asp-action="Index">Cancel</a>
+        </form>
+    </div>
+</div>

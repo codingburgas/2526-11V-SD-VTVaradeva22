@@ -1,0 +1,124 @@
+@model DashboardViewModel
+@{
+    ViewData["Title"] = "Dashboard";
+}
+
+<div class="mb-4">
+    <h1 class="h2 mb-1">Dashboard</h1>
+    <p class="text-secondary mb-0">Project overview, team productivity and deadline monitoring.</p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span>Total tasks</span>
+            <strong>@Model.TotalTasks</strong>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span>Completed</span>
+            <strong>@Model.CompletedTasks</strong>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span>Upcoming deadlines</span>
+            <strong>@Model.UpcomingDeadlinesCount</strong>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card">
+            <span>Completion rate</span>
+            <strong>@Model.CompletionPercentage%</strong>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <div class="col-lg-5">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Tasks by status</h2>
+                @foreach (var item in Model.TasksByStatus)
+                {
+                    <div class="d-flex justify-content-between border-bottom py-2">
+                        <span>@item.Key</span>
+                        <strong>@item.Value</strong>
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-7">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <h2 class="h5 mb-3">Top users this week</h2>
+                <div class="table-responsive">
+                    <table class="table align-middle mb-0">
+                        <thead class="table-light">
+                        <tr>
+                            <th>User</th>
+                            <th>Email</th>
+                            <th>Completed Tasks</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var user in Model.TopUsersThisWeek)
+                        {
+                            <tr>
+                                <td>@user.FullName</td>
+                                <td>@user.Email</td>
+                                <td>@user.CompletedTasks</td>
+                            </tr>
+                        }
+                        @if (!Model.TopUsersThisWeek.Any())
+                        {
+                            <tr>
+                                <td colspan="3" class="text-secondary">No completed tasks this week yet.</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm border-0 mt-4">
+    <div class="card-body">
+        <h2 class="h5 mb-3">Deadline alerts</h2>
+        <div class="table-responsive">
+            <table class="table align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>Task</th>
+                    <th>Board</th>
+                    <th>Deadline</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                @foreach (var task in Model.DeadlineAlerts)
+                {
+                    <tr>
+                        <td>@task.Title</td>
+                        <td>@task.BoardName</td>
+                        <td>@task.Deadline?.ToString("dd MMM yyyy")</td>
+                        <td>@task.Priority</td>
+                        <td>@task.Status</td>
+                    </tr>
+                }
+                @if (!Model.DeadlineAlerts.Any())
+                {
+                    <tr>
+                        <td colspan="5" class="text-secondary">No upcoming deadlines for the next 7 days.</td>
+                    </tr>
+                }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

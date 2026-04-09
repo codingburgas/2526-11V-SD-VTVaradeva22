@@ -1,0 +1,17 @@
+@model TaskDto
+@{
+    ViewData["Title"] = "Delete Task";
+}
+
+<div class="card shadow-sm border-0">
+    <div class="card-body p-4">
+        <h1 class="h3 text-danger mb-3">Delete task</h1>
+        <p>Are you sure you want to delete <strong>@Model.Title</strong>?</p>
+        <p class="text-secondary">Board: @Model.BoardName | Status: @Model.Status</p>
+
+        <form method="post">
+            <button type="submit" class="btn btn-danger">Delete</button>
+            <a class="btn btn-outline-secondary" asp-action="Details" asp-route-id="@Model.Id">Cancel</a>
+        </form>
+    </div>
+</div>
