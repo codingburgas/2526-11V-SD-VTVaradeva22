@@ -1,15 +1,24 @@
-﻿using TaskManager.Models.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using TaskManager.Models.DTOs;
+using TaskManager.ViewModels;
 
-namespace TaskManager.Services.Interfaces
+namespace TaskManager.Services.Interfaces;
+
+public interface IBoardService
 {
-    public interface IBoardService
-    {
-        Task<IEnumerable<Board>> GetAllBoardsAsync();
-        Task<Board> GetBoardByIdAsync(int id);
-        Task AddBoardAsync(Board board);
-        Task UpdateBoardAsync(Board board);
-        Task DeleteBoardAsync(int id);
-    }
+    Task<IReadOnlyCollection<BoardDto>> GetAllAsync(string userId, bool isAdmin);
+
+    Task<BoardDetailsViewModel?> GetDetailsAsync(int id, string userId, bool isAdmin);
+
+    Task<BoardViewModel?> GetEditModelAsync(int id, string userId, bool isAdmin);
+
+    Task<BoardDto?> GetSummaryAsync(int id, string userId, bool isAdmin);
+
+    Task<int> CreateAsync(BoardViewModel model, string ownerId);
+
+    Task<bool> UpdateAsync(BoardViewModel model, string userId, bool isAdmin);
+
+    Task<bool> DeleteAsync(int id, string userId, bool isAdmin);
+
+    Task<IReadOnlyCollection<SelectListItem>> GetBoardOptionsAsync(string userId, bool isAdmin);
 }

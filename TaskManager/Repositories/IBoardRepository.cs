@@ -1,15 +1,12 @@
-﻿using TaskManager.Models.Entities;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using TaskManager.Models.Entities;
 
-namespace TaskManager.Repositories
+namespace TaskManager.Repositories;
+
+public interface IBoardRepository
 {
-    public interface IBoardRepository
-    {
-        Task<IEnumerable<Board>> GetAllAsync();
-        Task<Board> GetByIdAsync(int id);
-        Task AddAsync(Board board);
-        Task UpdateAsync(Board board);
-        Task DeleteAsync(int id);
-    }
+    Task<IReadOnlyCollection<Board>> GetAllAsync(string userId, bool isAdmin);
+
+    Task<Board?> GetByIdAsync(int id, string userId, bool isAdmin);
+
+    Task AddAsync(Board board);
 }
