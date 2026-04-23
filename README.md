@@ -46,19 +46,7 @@ TaskManager is an ASP.NET Core MVC web application inspired by Trello and Kanban
   - Email: `user@taskmanager.local`
   - Password: `User123!`
 
-## Setup
-
-1. Open `TaskManager.sln`.
-2. Check `TaskManager/appsettings.json`.
-3. Set `DefaultConnection` to a SQL Server instance available on your machine.
-4. Run:
-
-```bash
-dotnet ef database update --project TaskManager/TaskManager.csproj --startup-project TaskManager/TaskManager.csproj
-dotnet run --project TaskManager/TaskManager.csproj
-```
-
 ## Notes
 
 - The current default connection string uses `LocalDB`. If your machine uses `SQLEXPRESS`, replace the server name in `appsettings.json`.
-- The application applies migrations and seed data automatically on startup.
+
