@@ -1,10 +1,12 @@
 :root {
-  --tm-primary: #8b5cf6;
-  --tm-primary-dark: #6d28d9;
-  --tm-accent: #c084fc;
+  --tm-primary: #d879a6;
+  --tm-primary-dark: #b65784;
+  --tm-accent: #f4bfd3;
+  --tm-accent-strong: #ef9abb;
   --tm-surface: #ffffff;
-  --tm-muted: #64748b;
-  --tm-bg: linear-gradient(180deg, #f5f3ff 0%, #faf5ff 45%, #f3e8ff 100%);
+  --tm-surface-soft: #fff5f8;
+  --tm-muted: #7b6774;
+  --tm-bg: radial-gradient(circle at top left, #fff8fc 0%, #fff3f7 24%, #fdf0f5 48%, #f8e7ef 100%);
 }
 
 html {
@@ -15,7 +17,7 @@ html {
 body {
   min-height: 100vh;
   background: var(--tm-bg);
-  color: #0f172a;
+  color: #33242d;
   line-height: 1.65;
 }
 
@@ -36,7 +38,8 @@ h3, .h3 {
 }
 
 .app-header {
-  background: linear-gradient(135deg, #5b21b6, var(--tm-primary));
+  background: linear-gradient(135deg, #b65f87, var(--tm-primary));
+  box-shadow: 0 14px 30px rgba(190, 105, 145, 0.18);
   padding: 0.45rem 0;
 }
 
@@ -66,33 +69,92 @@ h3, .h3 {
 }
 
 .hero-card {
-  background: linear-gradient(145deg, #ffffff, #efe7ff);
-  border: 1px solid rgba(139, 92, 246, 0.16);
-  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.08);
-  padding: 3rem !important;
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.96), rgba(255, 255, 255, 0) 42%),
+    linear-gradient(145deg, #fffdfd, #fde8f1 56%, #f7dbe8 100%);
+  border: 1px solid rgba(216, 121, 166, 0.18);
+  box-shadow: 0 28px 70px rgba(118, 54, 83, 0.12);
+  padding: 2.35rem !important;
+}
+
+.hero-card::before,
+.hero-card::after {
+  content: "";
+  position: absolute;
+  border-radius: 999px;
+  pointer-events: none;
+  filter: blur(8px);
+}
+
+.hero-card::before {
+  width: 240px;
+  height: 240px;
+  background: rgba(250, 201, 223, 0.32);
+  top: -90px;
+  left: -70px;
+}
+
+.hero-card::after {
+  width: 280px;
+  height: 280px;
+  background: rgba(244, 191, 211, 0.3);
+  right: -90px;
+  bottom: -130px;
+}
+
+.hero-shell {
+  min-height: 590px;
 }
 
 .hero-card h1 {
   font-size: clamp(3rem, 5vw, 4.6rem);
   line-height: 1.08;
   max-width: 10ch;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-card .lead {
   font-size: 1.38rem;
   max-width: 34ch;
+  position: relative;
+  z-index: 1;
 }
 
 .hero-card .btn-lg {
   font-size: 1.15rem;
   padding: 0.9rem 1.4rem;
+  position: relative;
+  z-index: 1;
 }
 
-.feature-panel {
+.soft-badge {
+  background: rgba(255, 255, 255, 0.75);
+  color: var(--tm-primary-dark);
+  border: 1px solid rgba(216, 121, 166, 0.26);
+  padding: 0.75rem 1rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  position: relative;
+  z-index: 1;
+}
+
+.hero-lead {
+  color: var(--tm-muted) !important;
+}
+
+.hero-mini-stats {
   display: grid;
-  gap: 1.25rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.85rem;
+  position: relative;
+  z-index: 1;
 }
 
+.hero-mini-stat,
 .feature-item,
 .stat-card,
 .task-meta,
@@ -101,10 +163,91 @@ h3, .h3 {
   border-radius: 1rem;
 }
 
+.card {
+  background: rgba(255, 253, 254, 0.94);
+  border: 1px solid rgba(216, 121, 166, 0.14) !important;
+  box-shadow: 0 18px 40px rgba(118, 54, 83, 0.08);
+}
+
+.hero-mini-stat {
+  padding: 0.95rem 1rem;
+  background: rgba(255, 255, 255, 0.66);
+  border: 1px solid rgba(216, 121, 166, 0.14);
+  box-shadow: 0 14px 30px rgba(118, 54, 83, 0.07);
+  backdrop-filter: blur(10px);
+}
+
+.hero-mini-stat strong {
+  display: block;
+  margin-bottom: 0.35rem;
+  font-size: 1.05rem;
+}
+
+.hero-mini-stat span {
+  color: var(--tm-muted);
+  font-size: 0.96rem;
+}
+
+.hero-visual-wrap {
+  position: relative;
+  z-index: 1;
+  min-height: 480px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.hero-visual-image {
+  width: min(100%, 540px);
+  filter: drop-shadow(0 24px 50px rgba(118, 54, 83, 0.18));
+}
+
+.hero-floating-card {
+  position: absolute;
+  max-width: 235px;
+  padding: 1rem 1.05rem;
+  background: rgba(255, 253, 254, 0.82);
+  border: 1px solid rgba(216, 121, 166, 0.16);
+  box-shadow: 0 18px 38px rgba(118, 54, 83, 0.12);
+  backdrop-filter: blur(14px);
+}
+
+.hero-floating-card strong {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-size: 1.08rem;
+}
+
+.hero-floating-card p {
+  margin-bottom: 0;
+  color: var(--tm-muted);
+  font-size: 0.98rem;
+}
+
+.hero-floating-tag {
+  display: inline-block;
+  margin-bottom: 0.7rem;
+  color: var(--tm-primary-dark);
+  font-size: 0.82rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.hero-floating-card-top {
+  top: 26px;
+  right: 8px;
+}
+
+.hero-floating-card-bottom {
+  bottom: 18px;
+  left: 18px;
+}
+
 .feature-item {
-  padding: 1.35rem;
-  background: rgba(255, 255, 255, 0.75);
-  border: 1px solid rgba(139, 92, 246, 0.12);
+  padding: 1.6rem;
+  background: rgba(255, 248, 251, 0.82);
+  border: 1px solid rgba(216, 121, 166, 0.14);
 }
 
 .feature-item h5 {
@@ -120,10 +263,10 @@ h3, .h3 {
 
 .stat-card {
   height: 100%;
-  padding: 1.25rem;
-  background: rgba(255, 255, 255, 0.85);
-  border: 1px solid rgba(148, 163, 184, 0.2);
-  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  padding: 1.55rem;
+  background: rgba(255, 248, 251, 0.88);
+  border: 1px solid rgba(216, 121, 166, 0.14);
+  box-shadow: 0 12px 30px rgba(118, 54, 83, 0.06);
 }
 
 .stat-card span {
@@ -150,10 +293,10 @@ h3, .h3 {
 }
 
 .kanban-column {
-  background: rgba(255, 255, 255, 0.88);
-  border: 1px solid rgba(148, 163, 184, 0.18);
-  box-shadow: 0 12px 32px rgba(15, 23, 42, 0.06);
-  padding: 1rem;
+  background: rgba(255, 250, 252, 0.9);
+  border: 1px solid rgba(216, 121, 166, 0.12);
+  box-shadow: 0 12px 32px rgba(118, 54, 83, 0.06);
+  padding: 1.25rem;
 }
 
 .kanban-column-header {
@@ -176,11 +319,11 @@ h3, .h3 {
 }
 
 .kanban-card {
-  padding: 1rem;
-  background: linear-gradient(180deg, #ffffff, #f8fafc);
-  border: 1px solid rgba(148, 163, 184, 0.16);
+  padding: 1.2rem;
+  background: linear-gradient(180deg, #fffefe, #fff4f8);
+  border: 1px solid rgba(216, 121, 166, 0.12);
   border-radius: 1rem;
-  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 8px 20px rgba(118, 54, 83, 0.05);
   cursor: grab;
 }
 
@@ -194,14 +337,14 @@ h3, .h3 {
 }
 
 .task-meta {
-  padding: 1rem;
-  background: rgba(241, 245, 249, 0.8);
+  padding: 1.2rem;
+  background: rgba(255, 242, 247, 0.8);
 }
 
 .auth-card {
   max-width: 760px;
-  background: rgba(255, 255, 255, 0.9);
-  box-shadow: 0 22px 50px rgba(15, 23, 42, 0.08) !important;
+  background: rgba(255, 253, 254, 0.92);
+  box-shadow: 0 22px 50px rgba(118, 54, 83, 0.1) !important;
 }
 
 .auth-page {
@@ -256,7 +399,20 @@ h3, .h3 {
 .small,
 p,
 li {
-  font-size: 1.04rem;
+  font-size: 1.08rem;
+}
+
+.card-body {
+  padding: 1.8rem;
+}
+
+.table th,
+.table td {
+  padding: 1rem 1.1rem;
+}
+
+.small {
+  font-size: 1rem !important;
 }
 
 .form-control,
@@ -307,12 +463,31 @@ li {
     padding: 1.75rem !important;
   }
 
+  .hero-shell {
+    min-height: auto;
+  }
+
   .hero-card h1 {
     font-size: clamp(2.4rem, 9vw, 3.2rem);
   }
 
   .hero-card .lead {
     font-size: 1.15rem;
+  }
+
+  .hero-mini-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .hero-visual-wrap {
+    min-height: auto;
+    padding-top: 1rem;
+  }
+
+  .hero-floating-card {
+    position: static;
+    max-width: none;
+    margin-top: 1rem;
   }
 
   .auth-page .card-body {
