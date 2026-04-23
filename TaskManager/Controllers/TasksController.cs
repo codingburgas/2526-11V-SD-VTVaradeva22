@@ -118,6 +118,7 @@ public class TasksController : Controller
     [HttpGet]
     public async Task<IActionResult> GetLists(int boardId)
     {
+        // Return board lists as JSON for the task form dropdown.
         var lists = await _taskService.GetListOptionsAsync(boardId, User.GetUserId()!, User.IsInRole("Admin"));
         return Json(lists.Select(l => new { value = l.Value, text = l.Text }));
     }
@@ -125,6 +126,7 @@ public class TasksController : Controller
     [HttpPost]
     public async Task<IActionResult> Move(int taskId, int targetListId)
     {
+        // This is used by drag-and-drop on the board page.
         var result = await _taskService.MoveAsync(taskId, targetListId, User.GetUserId()!, User.IsInRole("Admin"));
         if (!result.Succeeded)
         {
@@ -136,6 +138,7 @@ public class TasksController : Controller
 
     private async Task<TaskViewModel> RehydrateAsync(TaskViewModel model)
     {
+        // Rebuild dropdown data when the form comes back with validation errors.
         model.AvailableBoards = (await _taskService.BuildCreateViewModelAsync(User.GetUserId()!, User.IsInRole("Admin"), model.BoardId)).AvailableBoards;
         model.AvailableLists = await _taskService.GetListOptionsAsync(model.BoardId, User.GetUserId()!, User.IsInRole("Admin"));
         model.AvailableUsers = (await _taskService.BuildCreateViewModelAsync(User.GetUserId()!, User.IsInRole("Admin"), model.BoardId)).AvailableUsers;

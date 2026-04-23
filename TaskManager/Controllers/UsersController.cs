@@ -18,12 +18,14 @@ public class UsersController : Controller
 
     public async Task<IActionResult> Index()
     {
+        // Only admins can open the user management page.
         var users = await _userService.GetAllAsync();
         return View(users);
     }
 
     public async Task<IActionResult> Edit(string id)
     {
+        // Load one user with role data for the edit form.
         var model = await _userService.GetEditModelAsync(id);
         if (model == null)
         {
@@ -41,9 +43,11 @@ public class UsersController : Controller
             return View(model);
         }
 
+        // Update the selected user role.
         var result = await _userService.UpdateRoleAsync(model);
         if (!result.Succeeded)
         {
+            // Reload the role options if the update fails.
             ModelState.AddModelError(string.Empty, result.Message);
             var reloaded = await _userService.GetEditModelAsync(model.Id);
             return View(reloaded ?? model);

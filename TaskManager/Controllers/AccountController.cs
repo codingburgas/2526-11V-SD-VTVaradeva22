@@ -21,6 +21,7 @@ public class AccountController : Controller
     [AllowAnonymous]
     public IActionResult Login()
     {
+        // Show an empty login form
         return View(new LoginViewModel());
     }
 
@@ -33,6 +34,7 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Try to sign in with the entered email and password.
         var result = await _signInManager.PasswordSignInAsync(model.Email, model.Password, model.RememberMe, false);
         if (!result.Succeeded)
         {
@@ -40,17 +42,20 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Go back to the requested page if it is safe.
         if (!string.IsNullOrWhiteSpace(returnUrl) && Url.IsLocalUrl(returnUrl))
         {
             return Redirect(returnUrl);
         }
 
+        // Default login target.
         return RedirectToAction("Index", "Dashboard");
     }
 
     [AllowAnonymous]
     public IActionResult Register()
     {
+        // Show an empty register form.
         return View(new RegisterViewModel());
     }
 
@@ -63,6 +68,7 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // Create the new app user from the form data.
         var user = new ApplicationUser
         {
             FullName = model.FullName.Trim(),
@@ -74,6 +80,7 @@ public class AccountController : Controller
         var result = await _userManager.CreateAsync(user, model.Password);
         if (!result.Succeeded)
         {
+            // Show all Identity validation errors in the form.
             foreach (var error in result.Errors)
             {
                 ModelState.AddModelError(string.Empty, error.Description);
@@ -82,7 +89,10 @@ public class AccountController : Controller
             return View(model);
         }
 
+        // New registrations start as normal users.
         await _userManager.AddToRoleAsync(user, RoleNames.User);
+
+        // Sign in right after successful registration.
         await _signInManager.SignInAsync(user, false);
         return RedirectToAction("Index", "Dashboard");
     }
@@ -91,6 +101,7 @@ public class AccountController : Controller
     [Authorize]
     public async Task<IActionResult> Logout()
     {
+        // End the current login session.
         await _signInManager.SignOutAsync();
         return RedirectToAction("Index", "Home");
     }

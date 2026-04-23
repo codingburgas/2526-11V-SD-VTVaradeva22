@@ -20,6 +20,7 @@ public class BoardListService : IBoardListService
 
     public async Task<BoardListViewModel?> GetEditModelAsync(int id, string userId, bool isAdmin)
     {
+        // Load the list only if the current user can access its board.
         var list = await _context.BoardLists
             .Include(l => l.Board)
             .FirstOrDefaultAsync(l => l.Id == id && (isAdmin || l.Board.OwnerId == userId));
@@ -40,6 +41,7 @@ public class BoardListService : IBoardListService
 
     public async Task<ServiceResult<int>> CreateAsync(BoardListViewModel model, string userId, bool isAdmin)
     {
+        // Only owners and admins can add lists to a board.
         var board = await _context.Boards
             .FirstOrDefaultAsync(b => b.Id == model.BoardId && (isAdmin || b.OwnerId == userId));
 
@@ -48,6 +50,7 @@ public class BoardListService : IBoardListService
             return ServiceResult<int>.Failure("You cannot create lists in this board.");
         }
 
+        // Put the new list at the end of the current board.
         var maxPosition = await _context.BoardLists
             .Where(l => l.BoardId == model.BoardId)
             .MaxAsync(l => (int?)l.Position);
@@ -85,6 +88,7 @@ public class BoardListService : IBoardListService
         list.Title = model.Title.Trim();
         if (list.Status != model.Status)
         {
+            // If the list status changes, update all tasks inside it too.
             foreach (var task in list.Tasks)
             {
                 task.Status = model.Status;
@@ -99,6 +103,7 @@ public class BoardListService : IBoardListService
 
     public async Task<ServiceResult> DeleteAsync(int id, string userId, bool isAdmin)
     {
+        // Load the list together with its tasks before delete.
         var list = await _context.BoardLists
             .Include(l => l.Board)
             .Include(l => l.Tasks)
@@ -111,6 +116,7 @@ public class BoardListService : IBoardListService
 
         if (list.Tasks.Any())
         {
+            // Keep users from losing tasks by accident.
             return ServiceResult.Failure("Delete or move the tasks in this list before removing it.");
         }
 

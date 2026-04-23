@@ -22,8 +22,10 @@ public class TaskService : ITaskService
 
     public async Task<TaskIndexViewModel> GetIndexAsync(string userId, bool isAdmin, int? boardId, Priority? priority, TaskItemStatus? status)
     {
+        // Start with only the tasks this user is allowed to see.
         var query = QueryAccessibleTasks(userId, isAdmin);
 
+        // Apply optional filters from the tasks page.
         if (boardId.HasValue)
         {
             query = query.Where(t => t.BoardId == boardId.Value);
@@ -39,6 +41,7 @@ public class TaskService : ITaskService
             query = query.Where(t => t.Status == status.Value);
         }
 
+        // Build the final list model for the UI table.
         var tasks = await query
             .OrderBy(t => t.Status)
             .ThenByDescending(t => t.Priority)
@@ -71,6 +74,7 @@ public class TaskService : ITaskService
 
     public async Task<TaskViewModel> BuildCreateViewModelAsync(string userId, bool isAdmin, int? boardId = null)
     {
+        // Pick the requested board, or the first available one if none was passed.
         var boards = await GetBoardOptionsForTaskFormsAsync(userId, isAdmin);
         var resolvedBoardId = boardId ?? boards.Select(b => int.Parse(b.Value)).FirstOrDefault();
 
@@ -113,6 +117,7 @@ public class TaskService : ITaskService
 
     public async Task<IReadOnlyCollection<SelectListItem>> GetListOptionsAsync(int boardId, string userId, bool isAdmin)
     {
+        // Users can open lists only for boards they own, can access, or manage as admin.
         var hasAccess = await _context.Boards
             .AnyAsync(b => b.Id == boardId && (isAdmin || b.OwnerId == userId || b.Tasks.Any(t => t.AssignedToId == userId)));
 
@@ -130,6 +135,7 @@ public class TaskService : ITaskService
 
     public async Task<ServiceResult<int>> CreateAsync(TaskViewModel model, string userId, bool isAdmin)
     {
+        // Check board access before creating a new task.
         var board = await _context.Boards
             .FirstOrDefaultAsync(b => b.Id == model.BoardId && (isAdmin || b.OwnerId == userId || b.Tasks.Any(t => t.AssignedToId == userId)));
 
@@ -146,9 +152,11 @@ public class TaskService : ITaskService
             return ServiceResult<int>.Failure("The selected list does not belong to this board.");
         }
 
+        // Only admins can freely assign tasks to another user.
         var assignedToId = isAdmin ? model.AssignedToId : userId;
         var position = await GetNextTaskPositionAsync(list.Id);
 
+        // The list controls the current task status.
         var task = new TaskItem
         {
             Title = model.Title.Trim(),
@@ -184,6 +192,7 @@ public class TaskService : ITaskService
             return ServiceResult.Failure("Task was not found.");
         }
 
+        // A normal user cannot move the task to a board they do not have access to.
         var targetBoardId = isAdmin || await UserHasBoardAccessAsync(model.BoardId, userId)
             ? model.BoardId
             : task.BoardId;
@@ -196,6 +205,7 @@ public class TaskService : ITaskService
             return ServiceResult.Failure("The selected list is invalid.");
         }
 
+        // Save the old status so we can update CompletedAt correctly.
         var oldStatus = task.Status;
         task.Title = model.Title.Trim();
         task.Description = model.Description.Trim();
@@ -249,6 +259,7 @@ public class TaskService : ITaskService
 
     public async Task<ServiceResult> MoveAsync(int taskId, int targetListId, string userId, bool isAdmin)
     {
+        // Used when a task is dragged to another list.
         var task = await QueryAccessibleTasks(userId, isAdmin)
             .FirstOrDefaultAsync(t => t.Id == taskId);
 
@@ -265,6 +276,7 @@ public class TaskService : ITaskService
             return ServiceResult.Failure("Cannot move task to the selected list.");
         }
 
+        // Moving to another list also changes the task status.
         var oldStatus = task.Status;
         task.BoardListId = targetList.Id;
         task.Status = targetList.Status;
@@ -277,12 +289,14 @@ public class TaskService : ITaskService
 
     private IQueryable<TaskItem> QueryAccessibleTasks(string userId, bool isAdmin)
     {
+        // Load all related data needed by the task pages.
         var query = _context.Tasks
             .Include(t => t.Board)
             .Include(t => t.BoardList)
             .Include(t => t.AssignedTo)
             .AsQueryable();
 
+        // Normal users can only see owned boards or tasks assigned to them.
         if (!isAdmin)
         {
             query = query.Where(t => t.Board.OwnerId == userId || t.AssignedToId == userId);
@@ -304,6 +318,7 @@ public class TaskService : ITaskService
     {
         if (!isAdmin)
         {
+            // Normal users can only assign tasks to themselves.
             return await _context.Users
                 .Where(u => u.Id == userId)
                 .Select(u => new SelectListItem(u.FullName, u.Id))
@@ -318,6 +333,7 @@ public class TaskService : ITaskService
 
     private async Task<int> GetNextTaskPositionAsync(int boardListId)
     {
+        // Keep task order inside the selected list.
         var maxPosition = await _context.Tasks
             .Where(t => t.BoardListId == boardListId)
             .MaxAsync(t => (int?)t.Position);
@@ -332,11 +348,13 @@ public class TaskService : ITaskService
 
     private static DateTime? ResolveCompletedAt(TaskItemStatus oldStatus, TaskItemStatus newStatus, DateTime? currentCompletedAt)
     {
+        // Set completion time only when the task enters Done.
         if (newStatus == TaskItemStatus.Done && oldStatus != TaskItemStatus.Done)
         {
             return DateTime.UtcNow;
         }
 
+        // Clear completion time if the task leaves Done.
         if (newStatus != TaskItemStatus.Done)
         {
             return null;

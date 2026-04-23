@@ -18,6 +18,7 @@ public class ListsController : Controller
 
     public IActionResult Create(int boardId)
     {
+        // Start a new list inside the selected board.
         return View(new BoardListViewModel { BoardId = boardId });
     }
 
@@ -29,6 +30,7 @@ public class ListsController : Controller
             return View(model);
         }
 
+        // Try to add the new list to the selected board.
         var result = await _listService.CreateAsync(model, User.GetUserId()!, User.IsInRole("Admin"));
         if (!result.Succeeded)
         {
@@ -42,6 +44,7 @@ public class ListsController : Controller
 
     public async Task<IActionResult> Edit(int id)
     {
+        // Load the list data for editing.
         var model = await _listService.GetEditModelAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         if (model == null)
         {
@@ -72,6 +75,7 @@ public class ListsController : Controller
 
     public async Task<IActionResult> Delete(int id)
     {
+        // Reuse the edit model as a simple delete view model.
         var model = await _listService.GetEditModelAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         if (model == null)
         {
@@ -84,6 +88,7 @@ public class ListsController : Controller
     [HttpPost, ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id, int boardId)
     {
+        // Send the user back to the board after the delete attempt.
         var result = await _listService.DeleteAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         TempData[result.Succeeded ? "SuccessMessage" : "ErrorMessage"] = result.Message;
         return RedirectToAction("Details", "Boards", new { id = boardId });

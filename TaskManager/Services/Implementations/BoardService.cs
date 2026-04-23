@@ -24,12 +24,14 @@ public class BoardService : IBoardService
 
     public async Task<IReadOnlyCollection<BoardDto>> GetAllAsync(string userId, bool isAdmin)
     {
+        // Load boards from the repository and map them for the UI.
         var boards = await _repository.GetAllAsync(userId, isAdmin);
         return boards.Select(MapBoard).ToList();
     }
 
     public async Task<BoardDetailsViewModel?> GetDetailsAsync(int id, string userId, bool isAdmin)
     {
+        // Load one board with all data needed by the details page.
         var board = await _context.Boards
             .Include(b => b.Owner)
             .Include(b => b.Lists)
@@ -45,6 +47,7 @@ public class BoardService : IBoardService
         return new BoardDetailsViewModel
         {
             Board = MapBoard(board),
+            // Keep lists and tasks in their saved visual order.
             Lists = board.Lists
                 .OrderBy(l => l.Position)
                 .Select(list => new BoardListDto
@@ -88,6 +91,7 @@ public class BoardService : IBoardService
 
     public async Task<int> CreateAsync(BoardViewModel model, string ownerId)
     {
+        // Create the board first.
         var board = new Board
         {
             Name = model.Name.Trim(),
@@ -97,6 +101,7 @@ public class BoardService : IBoardService
 
         await _repository.AddAsync(board);
 
+        // Add the default Kanban columns for every new board.
         _context.BoardLists.AddRange(
             new BoardList
             {
@@ -139,6 +144,7 @@ public class BoardService : IBoardService
             return false;
         }
 
+        // Save the trimmed board text.
         board.Name = model.Name.Trim();
         board.Description = model.Description.Trim();
         await _context.SaveChangesAsync();
@@ -147,6 +153,7 @@ public class BoardService : IBoardService
 
     public async Task<bool> DeleteAsync(int id, string userId, bool isAdmin)
     {
+        // Only delete boards the current user can manage.
         var board = await _context.Boards
             .FirstOrDefaultAsync(b => b.Id == id && (isAdmin || b.OwnerId == userId));
 
@@ -162,6 +169,7 @@ public class BoardService : IBoardService
 
     public async Task<IReadOnlyCollection<SelectListItem>> GetBoardOptionsAsync(string userId, bool isAdmin)
     {
+        // Build dropdown options from accessible boards.
         var boards = await _repository.GetAllAsync(userId, isAdmin);
         return boards
             .Select(b => new SelectListItem(b.Name, b.Id.ToString()))
@@ -170,6 +178,7 @@ public class BoardService : IBoardService
 
     private static BoardDto MapBoard(Board board)
     {
+        // Convert the entity into a simpler UI model.
         return new BoardDto
         {
             Id = board.Id,
@@ -184,6 +193,7 @@ public class BoardService : IBoardService
 
     private static TaskDto MapTask(TaskItem task)
     {
+        // Convert task entity data for board cards and views.
         return new TaskDto
         {
             Id = task.Id,

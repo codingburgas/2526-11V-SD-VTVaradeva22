@@ -25,6 +25,7 @@ public class UserService : IUserService
 
     public async Task<IReadOnlyCollection<UserManagementViewModel>> GetAllAsync()
     {
+        // Load users for the admin screen.
         var users = await _context.Users
             .OrderBy(u => u.FullName)
             .ToListAsync();
@@ -33,6 +34,7 @@ public class UserService : IUserService
 
         foreach (var user in users)
         {
+            // Combine Identity role data with task statistics.
             var roles = await _userManager.GetRolesAsync(user);
             result.Add(new UserManagementViewModel
             {
@@ -74,6 +76,7 @@ public class UserService : IUserService
 
     public async Task<ServiceResult> UpdateRoleAsync(EditUserRoleViewModel model)
     {
+        // Find the target user before changing roles.
         var user = await _userManager.FindByIdAsync(model.Id);
         if (user == null)
         {
@@ -82,6 +85,7 @@ public class UserService : IUserService
 
         var currentRoles = await _userManager.GetRolesAsync(user);
 
+        // Do not allow the system to lose its last admin.
         if (currentRoles.Contains(RoleNames.Admin) && model.SelectedRole != RoleNames.Admin)
         {
             var adminCount = await _context.UserRoles
@@ -97,12 +101,14 @@ public class UserService : IUserService
             }
         }
 
+        // Identity stores roles separately, so we remove old ones first.
         var removeResult = await _userManager.RemoveFromRolesAsync(user, currentRoles);
         if (!removeResult.Succeeded)
         {
             return ServiceResult.Failure("Could not remove the current role.");
         }
 
+        // Then add the new selected role.
         var addResult = await _userManager.AddToRoleAsync(user, model.SelectedRole);
         if (!addResult.Succeeded)
         {

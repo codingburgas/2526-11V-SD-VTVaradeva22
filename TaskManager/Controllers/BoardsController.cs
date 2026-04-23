@@ -18,12 +18,14 @@ public class BoardsController : Controller
 
     public async Task<IActionResult> Index()
     {
+        // Show all boards the current user can access.
         var boards = await _boardService.GetAllAsync(User.GetUserId()!, User.IsInRole("Admin"));
         return View(boards);
     }
 
     public async Task<IActionResult> Details(int id)
     {
+        // Open one board with its lists and tasks.
         var board = await _boardService.GetDetailsAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         if (board == null)
         {
@@ -35,6 +37,7 @@ public class BoardsController : Controller
 
     public IActionResult Create()
     {
+        // Show an empty board form.
         return View(new BoardViewModel());
     }
 
@@ -46,6 +49,7 @@ public class BoardsController : Controller
             return View(model);
         }
 
+        // Create the board for the logged-in user.
         var boardId = await _boardService.CreateAsync(model, User.GetUserId()!);
         TempData["SuccessMessage"] = "Board created successfully.";
         return RedirectToAction(nameof(Details), new { id = boardId });
@@ -53,6 +57,7 @@ public class BoardsController : Controller
 
     public async Task<IActionResult> Edit(int id)
     {
+        // Load the board data into the edit form.
         var model = await _boardService.GetEditModelAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         if (model == null)
         {
@@ -82,6 +87,7 @@ public class BoardsController : Controller
 
     public async Task<IActionResult> Delete(int id)
     {
+        // Show a small board summary before delete.
         var board = await _boardService.GetSummaryAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         if (board == null)
         {
@@ -94,6 +100,7 @@ public class BoardsController : Controller
     [HttpPost, ActionName("Delete")]
     public async Task<IActionResult> DeleteConfirmed(int id)
     {
+        // Remove the board if the current user has access to it.
         var deleted = await _boardService.DeleteAsync(id, User.GetUserId()!, User.IsInRole("Admin"));
         if (!deleted)
         {

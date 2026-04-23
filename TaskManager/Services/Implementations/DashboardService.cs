@@ -20,21 +20,26 @@ public class DashboardService : IDashboardService
 
     public async Task<DashboardViewModel> GetDashboardAsync(string userId, bool isAdmin)
     {
+        // Load tasks with related data needed by the dashboard cards.
         var query = _context.Tasks
             .Include(t => t.Board)
             .Include(t => t.BoardList)
             .Include(t => t.AssignedTo)
             .AsQueryable();
 
+        // Normal users only see their own work area.
         if (!isAdmin)
         {
             query = query.Where(t => t.Board.OwnerId == userId || t.AssignedToId == userId);
         }
 
         var tasks = await query.ToListAsync();
+
+        // Use the current week for the top users section.
         var weekStart = Utilities.StartOfWeekUtc(DateTime.UtcNow);
         var nextWeek = DateTime.UtcNow.Date.AddDays(7);
 
+        // Build all dashboard numbers from the same task list.
         return new DashboardViewModel
         {
             TotalTasks = tasks.Count,
@@ -50,6 +55,8 @@ public class DashboardService : IDashboardService
             TasksByStatus = tasks
                 .GroupBy(t => t.Status)
                 .ToDictionary(group => Utilities.GetStatusLabel(group.Key), group => group.Count()),
+
+            // Show who completed the most work this week.
             TopUsersThisWeek = tasks
                 .Where(t => t.Status == TaskItemStatus.Done && t.CompletedAt.HasValue && t.CompletedAt >= weekStart && t.AssignedTo != null)
                 .GroupBy(t => new { t.AssignedTo!.FullName, t.AssignedTo!.Email })
@@ -62,6 +69,8 @@ public class DashboardService : IDashboardService
                     CompletedTasks = group.Count()
                 })
                 .ToList(),
+
+            // Show the nearest task deadlines that still need work.
             DeadlineAlerts = tasks
                 .Where(t =>
                     t.Deadline.HasValue &&
